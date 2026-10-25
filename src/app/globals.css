@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #050a14;
+  --color-navy: #0a1224;
+  --color-panel: #141d2e;
+  --color-gold: #e6b865;
+  --color-gold-deep: #c8964a;
+  --color-paper: #dcdcdc;
+  --font-display: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-body: "Libre Caslon Text", Georgia, "Times New Roman", serif;
+}
+
+html {
+  background: var(--color-ink);
+  color-scheme: dark;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: #f2efe6;
+  background: transparent;
+}
+
+/* dark stadium backdrop (pure CSS, no image assets) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 60px, transparent 60px 120px),
+    radial-gradient(120% 55% at 50% 108%, rgba(34, 96, 45, 0.55) 0%, rgba(14, 40, 24, 0.35) 45%, transparent 75%),
+    radial-gradient(60% 30% at 15% 0%, rgba(230, 184, 101, 0.07), transparent 70%),
+    linear-gradient(180deg, #03060d 0%, #060d18 55%, #07120f 100%);
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* header: navy fading to gold on the right, like the wireframe */
+.site-header {
+  background: linear-gradient(90deg, #0a1224 0%, #0a1224 52%, #d6a85a 100%);
+  border-bottom: 1px solid rgba(230, 184, 101, 0.35);
+}
+
+.pill-outline {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 9999px;
+}
+
+/* 2-column match panel with thin dividers */
+.match-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.match-grid > .cell {
+  padding: 14px 18px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+.match-grid > .cell:last-child {
+  border-bottom: 0;
+}
+@media (min-width: 768px) {
+  .match-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .match-grid > .cell:nth-child(odd) {
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .match-grid > .cell:nth-child(odd):nth-last-child(2) {
+    border-bottom: 0;
+  }
+}
+
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: rgba(230, 184, 101, 0.35);
+  border-radius: 8px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 2px;
+}
