@@ -15,6 +15,7 @@ import HomePage from "@/app/page";
 import NewsPage from "@/app/news/page";
 import MatchesPage from "@/app/matches/page";
 import PredictsPage from "@/app/predicts/page";
+import { TOURNAMENTS } from "@/lib/data";
 import { CookieProvider } from "@/components/CookieConsent";
 import { Footer } from "@/components/Footer";
 
@@ -34,34 +35,49 @@ describe("year filter (Home, News, Matches)", () => {
       render(<Page />);
       const opts = within(screen.getByLabelText("World Cup year")).getAllByRole("option");
       expect(opts.map((o) => o.textContent)).toEqual(
-        ["2022", "2018", "2014", "2010", "2006", "2002", "1998", "1994", "1990", "1986"],
+        ["2026", "2022", "2018", "2014", "2010", "2006", "2002", "1998", "1994", "1990"],
       );
     });
   }
 
-  it("Home: all stages for 2022 and kick-off format xx/xx/xx - 00:00", () => {
+  it("Home: defaults to 2026 with Round of 32, 104 matches and kick-off format xx/xx/xx - 00:00", () => {
     render(<HomePage />);
-    for (const s of ["Group Stage", "Round of 16", "Quarter-finals", "Semi-finals", "3rd Place Play-off", "Final"]) {
-      expect(screen.getAllByText(new RegExp(s)).length).toBeGreaterThan(0);
+    for (const st of ["Group Stage", "Round of 32", "Round of 16", "Quarter-finals", "Semi-finals", "3rd Place Play-off", "Final"]) {
+      expect(screen.getAllByText(new RegExp(st)).length).toBeGreaterThan(0);
     }
-    expect(screen.getByText("20/11/22 - 19:00")).toBeTruthy(); // Qatar v Ecuador
-    expect(screen.getAllByText("Argentina").length).toBeGreaterThan(0);
+    expect(screen.getByText("11/06/26 - 13:00")).toBeTruthy(); // Mexico v South Africa
+    expect(screen.getAllByText(/^\d\d\/\d\d\/\d\d - \d\d:\d\d$/).length).toBe(104);
   });
 
-  it("Home: switching year changes the data", async () => {
+  it("Home: switching year changes the data (2022 has no Round of 32, 1990 opener)", async () => {
     render(<HomePage />);
-    await userEvent.selectOptions(screen.getByLabelText("World Cup year"), "1986");
-    expect(screen.getByText("31/05/86 - 12:00")).toBeTruthy(); // 1986 opener: Italy v Bulgaria
+    await userEvent.selectOptions(screen.getByLabelText("World Cup year"), "2022");
+    expect(screen.getByText("20/11/22 - 19:00")).toBeTruthy(); // Qatar v Ecuador
+    expect(screen.queryByText(/Round of 32/)).toBeNull();
+    await userEvent.selectOptions(screen.getByLabelText("World Cup year"), "1990");
+    expect(screen.getByText("08/06/90 - 18:00")).toBeTruthy(); // Argentina v Cameroon
     expect(screen.queryByText("20/11/22 - 19:00")).toBeNull();
   });
 
-  it("Matches: overall table shows 'Team (Group X)' with all metrics", () => {
+  it("Matches: overall table shows 'Team (Group X)' with all metrics incl. TCS", async () => {
     render(<MatchesPage />);
-    expect(screen.getByText("France (Group D)")).toBeTruthy();
-    for (const h of ["POS.", "TEAM", "MATCH", "W", "D", "L", "GF", "GA", "GD", "Pts"]) {
+    for (const h of ["POS.", "TEAM", "MATCH", "W", "D", "L", "GF", "GA", "GD", "TCS", "Pts"]) {
       expect(screen.getByRole("columnheader", { name: h })).toBeTruthy();
     }
-    expect(screen.getAllByRole("row").length).toBe(33); // header + 32 teams
+    // TCS sits between GD and Pts, like the wireframe
+    const heads = screen.getAllByRole("columnheader").map((h) => h.textContent);
+    expect(heads.slice(-3)).toEqual(["GD", "TCS", "Pts"]);
+    expect(screen.getAllByRole("row").length).toBe(49); // 2026: header + 48 teams
+    const missing = TOURNAMENTS["2026"].standings.filter((r) => r.tcs === null).length;
+    expect(screen.queryAllByText("–").length).toBe(missing); // "–" only where TCS is unknown
+
+    const mex = screen.getByText("Mexico (Group A)").closest("tr")!;
+    expect(within(mex).getAllByRole("cell").map((c) => c.textContent).slice(-2)[0]).toBe("-6"); // FIFA group-stage TCS
+    await userEvent.selectOptions(screen.getByLabelText("World Cup year"), "2022");
+    const row = screen.getByText("France (Group D)").closest("tr")!;
+    const cells = within(row).getAllByRole("cell").map((c) => c.textContent);
+    expect(cells.slice(-2)).toEqual(["-8", "16"]); // TCS -8, 16 pts
+    expect(screen.getAllByRole("row").length).toBe(33);
   });
 });
 

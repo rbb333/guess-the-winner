@@ -5,7 +5,7 @@ import { DEFAULT_YEAR, TOURNAMENTS, type Year } from "@/lib/data";
 import { Flag } from "@/components/Flag";
 import { YearSelect } from "@/components/YearSelect";
 
-const COLS = ["MATCH", "W", "D", "L", "GF", "GA", "GD", "Pts"] as const;
+const COLS = ["MATCH", "W", "D", "L", "GF", "GA", "GD", "TCS", "Pts"] as const;
 
 export default function MatchesPage() {
   const [year, setYear] = useState<Year>(DEFAULT_YEAR);
@@ -55,6 +55,7 @@ export default function MatchesPage() {
                 <td className="py-2 text-right tabular-nums">{r.gf}</td>
                 <td className="py-2 text-right tabular-nums">{r.ga}</td>
                 <td className="py-2 text-right tabular-nums">{r.gd > 0 ? `+${r.gd}` : r.gd}</td>
+                <td className="py-2 text-right tabular-nums">{r.tcs === null ? "–" : r.tcs}</td>
                 <td className="py-2 text-right font-bold tabular-nums">{r.pts}</td>
               </tr>
             ))}
@@ -66,6 +67,13 @@ export default function MatchesPage() {
         Ranking covers every match of the tournament (group stage and knockout rounds), ordered by points, then goal
         difference, then goals for. Points use that edition’s win value ({t.pointsPerWin} per win, 1 per draw); a match
         decided on penalties counts as a draw, as in FIFA’s own statistics. Group letters come from the group stage.
+      </p>
+      <p className="mt-2 text-xs leading-relaxed text-white/50">
+        TCS = Team Conduct Score, the sum over all matches of FIFA’s fair-play deductions: yellow card −1, second yellow
+        (indirect red) −3, direct red −4, yellow followed by direct red −5. The closer to 0, the fairer the team.
+        {t.standings.some((r) => r.tcs === null) && " “–” = card data not available for that team."}
+        {year === 2026 &&
+          " For 2026 the TCS is FIFA’s official group-stage Team Conduct Score; knockout-round cards are not included."}
       </p>
     </main>
   );

@@ -32,6 +32,7 @@ export type Standing = {
   gf: number;
   ga: number;
   gd: number;
+  tcs: number | null; // Team Conduct Score, null when card data is unavailable
   pts: number;
 };
 
