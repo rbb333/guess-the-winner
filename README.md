@@ -17,6 +17,8 @@ npm test           # 11 UI/behaviour tests
 ```
 
 ## Data
+Full list of sources, licences and the required CC BY-SA attribution: see **DATA_SOURCES.md**.
+
 * `data/matches.csv`, `data/bookings.csv` (1930–2022): **The Fjelstul World Cup Database**
   (github.com/jfjelstul/worldcup, CC BY-SA 4.0).
 * `data/worldcup2026.json` (all 104 matches of the 2026 World Cup): openfootball/worldcup.json (public domain).
